@@ -41,7 +41,84 @@ app.post('/auth/register', async (req, res) => {
         return res.status(422).json({ msg: "As senhas não conferem!" })
     }
 
+    // Checa email existente
+    const userExists = await User.findOne({ email: email });
+
+    if (userExists) {
+        return res.status(422).json({ msg: "Por favor, utilize outro e-mail!" });
+    }
+
+    // Cria Senha
+    const salt = await bcrypt.genSalt(12);
+    const passwordHash = await bcrypt.hash(password, salt);
+
+    // Cria Usuário
+    const user = new User({
+        name,
+        email,
+        password: passwordHash,
+    });
+
+    try {
+        await user.save()
+
+        res.status(201).json({ msg: "Usuário criado com sucesso!" })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ msg: "Aconteceu um erro, tente novamente mais tarde" })
+    }
 })
+
+//Login de Usuário
+
+app.post('/auth/login', async (req, res) => {
+
+    const { email, password } = req.body
+
+    //Validação
+
+    if (!email) {
+        return res.status(422).json({ msg: "O email é obrigatório" })
+    }
+
+    if (!password) {
+        return res.status(422).json({ msg: "A senha é obrigatória" })
+    }
+
+    // Checa usuário existente
+    const user = await User.findOne({ email: email });
+
+    if (!user) {
+        return res.status(404).json({ msg: "Usuário não encontrado!" });
+    }
+
+    //Checar senha está correta
+    const checkPassword = await bcrypt.compare(password, user.password)
+
+    if (!checkPassword) {
+        return res.status(422).json({ msg: "Senha invalida!" });
+    }
+
+    try {
+
+        const secret = process.env.SECRET
+
+        const token = jwt.sign(
+            {
+                id: user.id,
+            },
+            secret,
+        )
+
+        res.status(200).json({ msg: "Autencitação ralizada com sucesso", token })
+
+    } catch (error) {
+        console.log(error);
+
+        res.status(500).json({ msg: "Aconteceu um erro, tente novamente mais tarde" })
+    }
+})
+
 
 //Credenciais
 
