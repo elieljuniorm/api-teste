@@ -164,7 +164,7 @@ const dbPassword = process.env.DB_PASS
 
 mongoose.connect(`mongodb+srv://${dbUser}:${dbPassword}@cluster0.pbrb9mh.mongodb.net/?retryWrites=true&w=majority`)
     .then(() => {
-        app.listen(3000)
+        app.listen(`https://api-teste-chi.vercel.app/`)
         console.log("Conectou ao banco")
     })
     .catch((err) => console.log(err))
