@@ -1,4 +1,4 @@
-// Importações
+//Importações
 require('dotenv').config()
 const express = require('express')
 const mongoose = require('mongoose')
@@ -10,6 +10,9 @@ const app = express()
 
 //Cofiguração JSON response (sem isso o JSON não é lido)
 app.use(express.json())
+
+//Models (Importação do componente model)
+const User = require('./models/User')
 
 // Open Route - Public Route
 app.get('/', (req, res) => {
@@ -25,6 +28,19 @@ app.post('/auth/register', async (req, res) => {
     if (!name) {
         return res.status(422).json({ msg: "O nome é obrigatório" })
     }
+
+    if (!email) {
+        return res.status(422).json({ msg: "O email é obrigatório" })
+    }
+
+    if (!password) {
+        return res.status(422).json({ msg: "A senha é obrigatória" })
+    }
+
+    if (password !== confirmpassword) {
+        return res.status(422).json({ msg: "As senhas não conferem!" })
+    }
+
 })
 
 //Credenciais
